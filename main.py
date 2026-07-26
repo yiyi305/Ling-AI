@@ -1,18 +1,17 @@
 from flask import Flask, request, jsonify
 import sqlite3
 import os
+from datetime import datetime
 import threading
 import time
 import requests
-from datetime import datetime
 
 app = Flask(__name__)
 DATABASE = "/tmp/memory.db"
 MY_URL = "https://ling-ai-production.up.railway.app"
 
-# ---------- 数据库初始化 ----------
 def init_db():
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=10)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS memories
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +24,7 @@ def init_db():
     print("数据库初始化完成", flush=True)
 
 def save_memory(content):
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=10)
     c = conn.cursor()
     c.execute("INSERT INTO memories (content, timestamp) VALUES (?, ?)",
               (content, datetime.now().isoformat()))
@@ -33,14 +32,13 @@ def save_memory(content):
     conn.close()
 
 def get_memories(limit=20):
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=10)
     c = conn.cursor()
     rows = c.execute("SELECT content, timestamp FROM memories ORDER BY id DESC LIMIT ?",
                      (limit,)).fetchall()
     conn.close()
     return [{"content": r[0], "time": r[1]} for r in rows]
 
-# ---------- 路由 ----------
 @app.route("/")
 def home():
     return "铃 在线"
@@ -65,13 +63,8 @@ def webhook():
     save_memory(f"[webhook] {str(data)[:200]}")
     return jsonify({"status": "received"})
 
-    if __name__ != "__main__":
-    init_db()  # gunicorn导入时也会执行初始化
-    
+init_db()
+
 if __name__ == "__main__":
-    init_db()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-    init_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
