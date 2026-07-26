@@ -11,6 +11,7 @@ DATABASE = "/tmp/memory.db"
 MY_URL = "https://ling-ai-production.up.railway.app"
 
 def init_db():
+    save_memory("这是系统第一次启动，自动写入的记忆！")
     conn = sqlite3.connect(DATABASE, timeout=10)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS memories
