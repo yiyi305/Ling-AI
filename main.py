@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+import sysfrom flask import Flask, request, jsonify
 import sqlite3
 import os
 import threading
@@ -11,8 +11,11 @@ DATABASE = "memory.db"
 MY_URL = "https://ling-ai-production.up.railway.app"
 
 # ---------- 数据库初始化 ----------
-def init_db():
-    conn = sqlite3.connect(DATABASE)
+print("正在初始化数据库...", flush=True)
+    def init_db():
+    db_path = os.path.join(os.getcwd(), DATABASE)
+    print(f"数据库路径: {db_path}", flush=True)
+    conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS memories
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +25,7 @@ def init_db():
                  (key TEXT PRIMARY KEY, value TEXT)''')
     conn.commit()
     conn.close()
-
+    print("数据库初始化完成", flush=True)
 init_db()
 
 # ---------- 记忆读写 ----------
