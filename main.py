@@ -1,4 +1,5 @@
-import sysfrom flask import Flask, request, jsonify
+import sys
+from flask import Flask, request, jsonify
 import sqlite3
 import os
 import threading
